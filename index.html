@@ -42,16 +42,19 @@
     <button class="btn-portfolio" onclick="startMode('portfolio')">📈 Portfolio Math</button>
     <button class="btn-rules" onclick="showRules()">📖 View Rules</button>
     <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+    
     <button onclick="startMode('m12')">Multiplication 2–12</button>
     <button onclick="startMode('m2x1')">2-Digit × 1-Digit</button>
     <button onclick="startMode('m2x2')">2-Digit × 2-Digit</button>
     <button onclick="startMode('add3')">3-Digit Addition</button>
     <button onclick="startMode('sub3')">3-Digit Subtraction</button>
     
-    <button class="btn-custom" onclick="startSheetMode()">📝 Custom Questions (Sheet)</button>
+    <button class="btn-custom" onclick="startSheetMode()">📝 Custom Questions (from Sheet)</button>
     <div id="loadingMsg" class="loading">Fetching questions...</div>
     
-    <button class="btn-sheet" onclick="window.open('https://docs.google.com/spreadsheets/d/e/2PACX-1vT4Dugmd2CtGnRreZoVHbDqlNiWi6t-xxMgIvoyU8KW1ueQxtL3TiI9YKuHcIjXNSd_Zkqf8V6VxaeE/pubhtml', '_blank')">📊 Open Google Sheet</button>
+    <button class="btn-sheet" onclick="window.open('https://docs.google.com/spreadsheets/d/e/2PACX-1vT4Dugmd2CtGnRreZoVHbDqlNiWi6t-xxMgIvoyU8KW1ueQxtL3TiI9YKuHcIjXNSd_Zkqf8V6VxaeE/pubhtml', '_blank')">
+      📊 Open Google Sheet
+    </button>
   </div>
 
   <div id="rulesArea" class="card hidden">
@@ -59,15 +62,14 @@
     <div class="rules-list">
       <h3>1. Bps Math</h3>
       <ul>
-        <li><strong>Percents:</strong> Multiply first digit, drop level, add 1 zero. (Percent drops 2 places).</li>
-        <li><strong>Bps:</strong> Multiply, drop a level, drop 1 zero. (Basis point drops 4 places).</li>
+        <li><strong>Percents:</strong> Multiply first digit, drop level, add 1 zero.</li>
+        <li><strong>Bps:</strong> Multiply, drop a level, drop 1 zero.</li>
         <li><strong>Scale:</strong> 1k is 10 bps of 1m; 1m is 10 bps of 1b.</li>
       </ul>
       <h3>2. Big Math</h3>
       <ul>
         <li><strong>Levels:</strong> k (1), m (2), b (3).</li>
-        <li><strong>Scaling:</strong> 150k ppl × 100k: Up 1 level for k, 2 for m. Multiply front digits and add zero places (2 for 100, 1 for 10).</li>
-        <li><strong>Double Digits:</strong> XX × YY multiplication.</li>
+        <li><strong>Scaling:</strong> 150k ppl × 100k: Up 1 level for k, 2 for m. Multiply front digits and add zero places.</li>
       </ul>
     </div>
     <button onclick="hideRules()">Back to Menu</button>
@@ -97,19 +99,38 @@
   function showRules() { document.getElementById('menu').classList.add('hidden'); document.getElementById('rulesArea').classList.remove('hidden'); }
   function hideRules() { document.getElementById('rulesArea').classList.add('hidden'); document.getElementById('menu').classList.remove('hidden'); }
 
+  // Restored CSV parser with row handling
+  async function startSheetMode() {
+    document.getElementById('loadingMsg').style.display = 'block';
+    const csvUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vT4Dugmd2CtGnRreZoVHbDqlNiWi6t-xxMgIvoyU8KW1ueQxtL3TiI9YKuHcIjXNSd_Zkqf8V6VxaeE/pub?output=csv`;
+    try {
+      const resp = await fetch(csvUrl);
+      const data = await resp.text();
+      const rows = data.split(/\r?\n/);
+      sheetQuestions = rows.map(r => {
+        const c = r.split(',');
+        return { q: c[0]?.replace(/"/g,'').trim(), a: c[1]?.replace(/"/g,'').trim() };
+      }).filter(i => i.q && i.q.toLowerCase() !== "question");
+      
+      if (sheetQuestions.length > 0) {
+        isSheetMode = true; currentMode = null;
+        document.getElementById('menu').classList.add('hidden');
+        document.getElementById('questionArea').classList.remove('hidden');
+        nextQuestion();
+      } else { alert("No questions found in sheet."); }
+    } catch (e) { alert("Error accessing sheet."); } finally { document.getElementById('loadingMsg').style.display = 'none'; }
+  }
+
   function generatePortfolioQuestion() {
-    const units = [{label:'thousand',short:'k',val:1e3}, {label:'million',short:'m',val:1e6}, {label:'billion',short:'b',val:1e9}];
+    const units = [{s:'k',v:1e3}, {s:'m',v:1e6}, {s:'b',v:1e9}];
     const baseIdx = Math.random() > 0.5 ? 2 : 1; 
     const uBase = units[baseIdx];
-    const uExp = units[baseIdx - 1]; // 1000x less
-    
+    const uExp = units[baseIdx - 1];
     const amtExp = (Math.floor(Math.random() * 90) + 10) * (Math.random() > 0.5 ? 1 : -1);
     const amtBase = Math.floor(Math.random() * 9) + 1;
-    
     const qText = Math.random() > 0.5 
-      ? `This is ${amtExp}${uExp.short} of exposure on ${amtBase}${uBase.short} in GMV.`
-      : `The portfolio ${amtExp >= 0 ? 'gained' : 'lost'} ${Math.abs(amtExp)}${uExp.short} on ${amtBase}${uBase.short} in GMV.`;
-
+      ? `This is ${amtExp}${uExp.s} of exposure on ${amtBase}${uBase.s} in GMV.`
+      : `The portfolio ${amtExp >= 0 ? 'gained' : 'lost'} ${Math.abs(amtExp)}${uExp.s} on ${amtBase}${uBase.s} in GMV.`;
     return { q: qText + "<br><br>Basis points?", a: `${((amtExp / amtBase) * 10).toFixed(1)} bps` };
   }
 
@@ -118,20 +139,6 @@
     document.getElementById('menu').classList.add('hidden');
     document.getElementById('questionArea').classList.remove('hidden');
     nextQuestion();
-  }
-
-  async function startSheetMode() {
-    document.getElementById('loadingMsg').style.display = 'block';
-    const csvUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vT4Dugmd2CtGnRreZoVHbDqlNiWi6t-xxMgIvoyU8KW1ueQxtL3TiI9YKuHcIjXNSd_Zkqf8V6VxaeE/pub?output=csv`;
-    try {
-      const resp = await fetch(csvUrl);
-      const data = await resp.text();
-      sheetQuestions = data.split(/\r?\n/).map(r => {
-        const c = r.split(',');
-        return { q: c[0]?.replace(/"/g,'').trim(), a: c[1]?.replace(/"/g,'').trim() };
-      }).filter(i => i.q && i.q.toLowerCase() !== "question");
-      if (sheetQuestions.length > 0) { isSheetMode = true; startMode(null); }
-    } catch (e) { alert("Error loading sheet."); } finally { document.getElementById('loadingMsg').style.display = 'none'; }
   }
 
   function nextQuestion() {
@@ -164,7 +171,7 @@
     timeLeft = s; document.getElementById('timer').textContent = `Time: ${timeLeft}`;
     countdown = setInterval(() => {
       timeLeft--; document.getElementById('timer').textContent = `Time: ${timeLeft}`;
-      if (timeLeft <= 0) clearInterval(countdown);
+      if (timeLeft <= 0) { clearInterval(countdown); document.getElementById('timer').textContent = "Time Up!"; }
     }, 1000);
   }
 
