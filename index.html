@@ -6,100 +6,120 @@
   <title>Math Practice Pro</title>
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 16px; background: #f5f5f5; color: #333; }
-    .menu, .question-area, .rules-area { max-width: 480px; margin: auto; background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    h1 { text-align: center; }
+    h1 { text-align: center; color: #222; }
+    .container { max-width: 480px; margin: auto; }
+    .card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    
     button { 
       width: 100%; padding: 16px; margin: 8px 0; font-size: 18px; 
       cursor: pointer; border-radius: 12px; border: 1px solid #ddd; 
       background-color: white; transition: 0.2s; font-weight: 500;
     }
     button:active { background-color: #eee; transform: scale(0.98); }
+    
     .btn-portfolio { background-color: #007bff; color: white; border: none; }
     .btn-rules { background-color: #6c757d; color: white; border: none; }
+    .btn-sheet { background-color: #34a853; color: white; border: none; }
+    
     .question { font-size: 24px; text-align: center; margin: 24px 0; font-weight: bold; min-height: 60px; line-height: 1.4; }
     .answer { font-size: 28px; text-align: center; color: #d93025; margin: 16px 0; display: none; font-weight: bold; border-top: 1px solid #eee; padding-top: 10px; }
-    .rules-content { font-size: 14px; line-height: 1.6; }
-    .rules-content h3 { margin-bottom: 5px; color: #007bff; border-bottom: 1px solid #eee; }
     .timer { text-align: center; font-size: 18px; color: #666; font-weight: bold; }
-    .hidden { display: none; }
+    
+    .rules-list { text-align: left; font-size: 15px; line-height: 1.6; }
+    .rules-list h3 { color: #007bff; margin-top: 15px; border-bottom: 2px solid #f0f0f0; }
+    .rules-list ul { padding-left: 20px; }
+    
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
 
-<div id="mainMenu" class="menu">
-  <h1>Math Practice</h1>
-  <button class="btn-portfolio" onclick="startMode('portfolio')">📈 Portfolio Math</button>
-  <button onclick="startMode('m12')">Multiplication 2–12</button>
-  <button onclick="startMode('m2x1')">2-Digit × 1-Digit</button>
-  <button class="btn-rules" onclick="toggleRules(true)">📖 View Rules</button>
-  <button class="btn-custom" onclick="startSheetMode()">📝 Custom Questions</button>
-</div>
-
-<div id="rulesArea" class="rules-area hidden">
-  <h2>Math Rules</h2>
-  <div class="rules-content">
-    <h3>1. Bps Math</h3>
-    <ul>
-      <li><strong>Percents:</strong> Multiply first digit, drop level, add 1 zero. (Percent drops 2 places).</li>
-      <li><strong>Bps:</strong> Multiply, drop a level, drop 1 zero. (Basis point drops 4 places).</li>
-      <li><strong>Benchmarks:</strong> 1k is 10 bps of 1m; 1m is 10 bps of 1b.</li>
-    </ul>
-    <h3>2. Big Math</h3>
-    <ul>
-      <li><strong>Levels:</strong> Thousand (1), Million (2), Billion (3).</li>
-      <li><strong>Scaling:</strong> 150k ppl × 100k: Up 1 level for k, 2 for m. Multiply front digits and add zero places (2 for 100, 1 for 10).</li>
-      <li><strong>Double Digit:</strong> XX × YY multiplication.</li>
-    </ul>
+<div class="container">
+  <div id="menu">
+    <h1>Math Practice</h1>
+    <button class="btn-portfolio" onclick="startMode('portfolio')">📈 Portfolio Math</button>
+    <button class="btn-rules" onclick="showRules()">📖 View Rules</button>
+    <button onclick="startMode('m12')">Multiplication 2–12</button>
+    <button onclick="startMode('m2x1')">2-Digit × 1-Digit</button>
+    <button class="btn-sheet" onclick="startSheetMode()">📝 Custom Questions</button>
   </div>
-  <button onclick="toggleRules(false)">Back to Menu</button>
-</div>
 
-<div id="questionArea" class="question-area hidden">
-  <div class="timer" id="timer">Time: 20</div>
-  <div class="question" id="question"></div>
-  <div class="answer" id="answer"></div>
-  <button onclick="showAnswer()" style="background-color: #4285f4; color: white; border: none;">Show Answer</button>
-  <button onclick="nextQuestion()">Next Question</button>
-  <button onclick="backToMenu()" style="background-color: #eee;">Back to Menu</button>
+  <div id="rulesArea" class="card hidden">
+    <h2>Math Shortcuts</h2>
+    <div class="rules-list">
+      <h3>1. Bps Math</h3>
+      <ul>
+        <li><strong>Percents:</strong> Multiply first digit, drop a level (e.g., Bil to Mil), add 1 zero.</li>
+        <li><strong>Bps:</strong> Multiply, drop a level, drop 1 zero.</li>
+        <li><strong>Scale:</strong> 1k is 10 bps of 1m; 1m is 10 bps of 1b.</li>
+      </ul>
+      <h3>2. Big Math</h3>
+      <ul>
+        <li><strong>Levels:</strong> k (1), m (2), b (3).</li>
+        <li><strong>Salary Math:</strong> For 150k ppl × 100k: Up 1 level for k, 2 for m. Multiply front digits and add zero places.</li>
+        <li><strong>Double Digits:</strong> XX × YY.</li>
+      </ul>
+    </div>
+    <button onclick="hideRules()">Back to Menu</button>
+  </div>
+
+  <div id="questionArea" class="card hidden">
+    <div class="timer" id="timer">Time: 20</div>
+    <div class="question" id="question"></div>
+    <div class="answer" id="answer"></div>
+    <button onclick="showAnswer()" style="background-color: #4285f4; color: white; border: none;">Show Answer</button>
+    <button onclick="nextQuestion()">Next Question</button>
+    <button onclick="backToMenu()" style="background-color: #eee;">Back to Menu</button>
+  </div>
 </div>
 
 <script>
   let currentMode = null, countdown = null, timeLeft = 0;
 
-  const units = [
-    { label: 'thousand', short: 'k', val: 1e3 },
-    { label: 'million', short: 'm', val: 1e6 },
-    { label: 'billion', short: 'b', val: 1e9 }
-  ];
-
-  function toggleRules(show) {
-    document.getElementById('mainMenu').classList.toggle('hidden', show);
-    document.getElementById('rulesArea').classList.toggle('hidden', !show);
+  // UI Navigation
+  function showRules() {
+    document.getElementById('menu').classList.add('hidden');
+    document.getElementById('rulesArea').classList.remove('hidden');
+  }
+  function hideRules() {
+    document.getElementById('rulesArea').classList.add('hidden');
+    document.getElementById('menu').classList.remove('hidden');
   }
 
+  // Portfolio Math Generation
   function generatePortfolioQuestion() {
-    // Determine the "Base" (GMV) - either Million or Billion
+    const units = [
+      { label: 'thousand', short: 'k', val: 1e3 },
+      { label: 'million', short: 'm', val: 1e6 },
+      { label: 'billion', short: 'b', val: 1e9 }
+    ];
+
+    // Force 1/1000th ratio (k vs m, or m vs b)
     const baseIdx = Math.random() > 0.5 ? 2 : 1; 
-    const exposureIdx = baseIdx - 1; // Force exposure to be 1000x less (k if base is m, m if base is b)
+    const exposureIdx = baseIdx - 1;
 
     const uBase = units[baseIdx];
     const uExp = units[exposureIdx];
     
     const amtExp = (Math.floor(Math.random() * 90) + 10) * (Math.random() > 0.5 ? 1 : -1);
-    const amtBase = Math.floor(Math.random() * 9) + 1; // Simplify base to single digits for speed
+    const amtBase = Math.floor(Math.random() * 10) + 1;
     
-    const sentenceType = Math.random() > 0.5;
-    const qText = sentenceType 
+    const isExposureMsg = Math.random() > 0.5;
+    const qText = isExposureMsg 
       ? `This is ${amtExp}${uExp.short} of exposure on ${amtBase}${uBase.short} in GMV.`
       : `The portfolio ${amtExp >= 0 ? 'gained' : 'lost'} ${Math.abs(amtExp)}${uExp.short} on ${amtBase}${uBase.short} in GMV.`;
 
-    // Calculation: (amtExp / amtBase) * 10 (since 1m/1b is 10bps)
+    // 1 unit of lower level on 1 unit of higher level is always 10 bps
     const bpsResult = ((amtExp / amtBase) * 10).toFixed(1);
 
-    return {
-      q: qText + "<br><br>How many basis points?",
-      a: `${bpsResult} bps`
-    };
+    return { q: qText + "<br><br>Basis points?", a: `${bpsResult} bps` };
+  }
+
+  function startMode(mode) {
+    currentMode = mode;
+    document.getElementById('menu').classList.add('hidden');
+    document.getElementById('questionArea').classList.remove('hidden');
+    nextQuestion();
   }
 
   function nextQuestion() {
@@ -112,8 +132,9 @@
       q = p.q; a = p.a;
       startTimer(20);
     } else {
-      // Standard math logic...
-      q = "12 x 12"; a = "144"; // Placeholder
+      // Simple fallback for other modes
+      q = "12 x 12"; a = "144";
+      startTimer(10);
     }
 
     document.getElementById('question').innerHTML = q;
@@ -121,31 +142,22 @@
     speak(q.replace(/<br>/g, ' '));
   }
 
-  function startMode(mode) {
-    currentMode = mode;
-    document.getElementById('mainMenu').classList.add('hidden');
-    document.getElementById('questionArea').classList.remove('hidden');
-    nextQuestion();
-  }
-
-  function backToMenu() {
-    clearInterval(countdown);
-    document.getElementById('questionArea').classList.add('hidden');
-    document.getElementById('mainMenu').classList.remove('hidden');
-  }
-
-  function showAnswer() { document.getElementById('answer').style.display = 'block'; }
-
   function startTimer(seconds) {
     timeLeft = seconds;
     document.getElementById('timer').textContent = `Time: ${timeLeft}`;
     countdown = setInterval(() => {
       timeLeft--;
       document.getElementById('timer').textContent = `Time: ${timeLeft}`;
-      if (timeLeft <= 0) { clearInterval(countdown); }
+      if (timeLeft <= 0) clearInterval(countdown);
     }, 1000);
   }
 
+  function showAnswer() { document.getElementById('answer').style.display = 'block'; }
+  function backToMenu() {
+    clearInterval(countdown);
+    document.getElementById('questionArea').classList.add('hidden');
+    document.getElementById('menu').classList.remove('hidden');
+  }
   function speak(t) {
     const u = new SpeechSynthesisUtterance(t);
     u.rate = 0.9;
