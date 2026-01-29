@@ -6,7 +6,7 @@
   <title>Math Practice Pro</title>
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 16px; background: #f5f5f5; color: #333; }
-    h1 { text-align: center; color: #222; }
+    h1 { text-align: center; color: #222; margin-bottom: 20px; }
     .container { max-width: 480px; margin: auto; }
     .card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
     
@@ -20,10 +20,12 @@
     .btn-portfolio { background-color: #007bff; color: white; border: none; }
     .btn-rules { background-color: #6c757d; color: white; border: none; }
     .btn-sheet { background-color: #34a853; color: white; border: none; }
+    .btn-custom { background-color: #9c27b0; color: white; border: none; }
     
     .question { font-size: 24px; text-align: center; margin: 24px 0; font-weight: bold; min-height: 60px; line-height: 1.4; }
     .answer { font-size: 28px; text-align: center; color: #d93025; margin: 16px 0; display: none; font-weight: bold; border-top: 1px solid #eee; padding-top: 10px; }
     .timer { text-align: center; font-size: 18px; color: #666; font-weight: bold; }
+    .loading { font-style: italic; color: #888; text-align: center; display: none; margin-top: 10px; }
     
     .rules-list { text-align: left; font-size: 15px; line-height: 1.6; }
     .rules-list h3 { color: #007bff; margin-top: 15px; border-bottom: 2px solid #f0f0f0; }
@@ -39,9 +41,17 @@
     <h1>Math Practice</h1>
     <button class="btn-portfolio" onclick="startMode('portfolio')">📈 Portfolio Math</button>
     <button class="btn-rules" onclick="showRules()">📖 View Rules</button>
+    <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
     <button onclick="startMode('m12')">Multiplication 2–12</button>
     <button onclick="startMode('m2x1')">2-Digit × 1-Digit</button>
-    <button class="btn-sheet" onclick="startSheetMode()">📝 Custom Questions</button>
+    <button onclick="startMode('m2x2')">2-Digit × 2-Digit</button>
+    <button onclick="startMode('add3')">3-Digit Addition</button>
+    <button onclick="startMode('sub3')">3-Digit Subtraction</button>
+    
+    <button class="btn-custom" onclick="startSheetMode()">📝 Custom Questions (Sheet)</button>
+    <div id="loadingMsg" class="loading">Fetching questions...</div>
+    
+    <button class="btn-sheet" onclick="window.open('https://docs.google.com/spreadsheets/d/e/2PACX-1vT4Dugmd2CtGnRreZoVHbDqlNiWi6t-xxMgIvoyU8KW1ueQxtL3TiI9YKuHcIjXNSd_Zkqf8V6VxaeE/pubhtml', '_blank')">📊 Open Google Sheet</button>
   </div>
 
   <div id="rulesArea" class="card hidden">
@@ -49,22 +59,22 @@
     <div class="rules-list">
       <h3>1. Bps Math</h3>
       <ul>
-        <li><strong>Percents:</strong> Multiply first digit, drop a level (e.g., Bil to Mil), add 1 zero.</li>
-        <li><strong>Bps:</strong> Multiply, drop a level, drop 1 zero.</li>
+        <li><strong>Percents:</strong> Multiply first digit, drop level, add 1 zero. (Percent drops 2 places).</li>
+        <li><strong>Bps:</strong> Multiply, drop a level, drop 1 zero. (Basis point drops 4 places).</li>
         <li><strong>Scale:</strong> 1k is 10 bps of 1m; 1m is 10 bps of 1b.</li>
       </ul>
       <h3>2. Big Math</h3>
       <ul>
         <li><strong>Levels:</strong> k (1), m (2), b (3).</li>
-        <li><strong>Salary Math:</strong> For 150k ppl × 100k: Up 1 level for k, 2 for m. Multiply front digits and add zero places.</li>
-        <li><strong>Double Digits:</strong> XX × YY.</li>
+        <li><strong>Scaling:</strong> 150k ppl × 100k: Up 1 level for k, 2 for m. Multiply front digits and add zero places (2 for 100, 1 for 10).</li>
+        <li><strong>Double Digits:</strong> XX × YY multiplication.</li>
       </ul>
     </div>
     <button onclick="hideRules()">Back to Menu</button>
   </div>
 
   <div id="questionArea" class="card hidden">
-    <div class="timer" id="timer">Time: 20</div>
+    <div class="timer" id="timer">Time: --</div>
     <div class="question" id="question"></div>
     <div class="answer" id="answer"></div>
     <button onclick="showAnswer()" style="background-color: #4285f4; color: white; border: none;">Show Answer</button>
@@ -74,96 +84,93 @@
 </div>
 
 <script>
-  let currentMode = null, countdown = null, timeLeft = 0;
+  let currentMode = null, countdown = null, timeLeft = 0, sheetQuestions = [], isSheetMode = false;
 
-  // UI Navigation
-  function showRules() {
-    document.getElementById('menu').classList.add('hidden');
-    document.getElementById('rulesArea').classList.remove('hidden');
-  }
-  function hideRules() {
-    document.getElementById('rulesArea').classList.add('hidden');
-    document.getElementById('menu').classList.remove('hidden');
-  }
+  const modes = {
+    m12: { minA: 2, maxA: 12, minB: 2, maxB: 12, op: '×', time: 8 },
+    m2x1: { minA: 10, maxA: 99, minB: 2, maxB: 9, op: '×', time: 10 },
+    m2x2: { minA: 10, maxA: 99, minB: 10, maxB: 99, op: '×', time: 12 },
+    add3: { minA: 100, maxA: 999, minB: 100, maxB: 999, op: '+', time: 15 },
+    sub3: { minA: 100, maxA: 999, minB: 100, maxB: 999, op: '-', time: 15 }
+  };
 
-  // Portfolio Math Generation
+  function showRules() { document.getElementById('menu').classList.add('hidden'); document.getElementById('rulesArea').classList.remove('hidden'); }
+  function hideRules() { document.getElementById('rulesArea').classList.add('hidden'); document.getElementById('menu').classList.remove('hidden'); }
+
   function generatePortfolioQuestion() {
-    const units = [
-      { label: 'thousand', short: 'k', val: 1e3 },
-      { label: 'million', short: 'm', val: 1e6 },
-      { label: 'billion', short: 'b', val: 1e9 }
-    ];
-
-    // Force 1/1000th ratio (k vs m, or m vs b)
+    const units = [{label:'thousand',short:'k',val:1e3}, {label:'million',short:'m',val:1e6}, {label:'billion',short:'b',val:1e9}];
     const baseIdx = Math.random() > 0.5 ? 2 : 1; 
-    const exposureIdx = baseIdx - 1;
-
     const uBase = units[baseIdx];
-    const uExp = units[exposureIdx];
+    const uExp = units[baseIdx - 1]; // 1000x less
     
     const amtExp = (Math.floor(Math.random() * 90) + 10) * (Math.random() > 0.5 ? 1 : -1);
-    const amtBase = Math.floor(Math.random() * 10) + 1;
+    const amtBase = Math.floor(Math.random() * 9) + 1;
     
-    const isExposureMsg = Math.random() > 0.5;
-    const qText = isExposureMsg 
+    const qText = Math.random() > 0.5 
       ? `This is ${amtExp}${uExp.short} of exposure on ${amtBase}${uBase.short} in GMV.`
       : `The portfolio ${amtExp >= 0 ? 'gained' : 'lost'} ${Math.abs(amtExp)}${uExp.short} on ${amtBase}${uBase.short} in GMV.`;
 
-    // 1 unit of lower level on 1 unit of higher level is always 10 bps
-    const bpsResult = ((amtExp / amtBase) * 10).toFixed(1);
-
-    return { q: qText + "<br><br>Basis points?", a: `${bpsResult} bps` };
+    return { q: qText + "<br><br>Basis points?", a: `${((amtExp / amtBase) * 10).toFixed(1)} bps` };
   }
 
-  function startMode(mode) {
-    currentMode = mode;
+  function startMode(modeKey) {
+    isSheetMode = false; currentMode = modeKey;
     document.getElementById('menu').classList.add('hidden');
     document.getElementById('questionArea').classList.remove('hidden');
     nextQuestion();
   }
 
+  async function startSheetMode() {
+    document.getElementById('loadingMsg').style.display = 'block';
+    const csvUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vT4Dugmd2CtGnRreZoVHbDqlNiWi6t-xxMgIvoyU8KW1ueQxtL3TiI9YKuHcIjXNSd_Zkqf8V6VxaeE/pub?output=csv`;
+    try {
+      const resp = await fetch(csvUrl);
+      const data = await resp.text();
+      sheetQuestions = data.split(/\r?\n/).map(r => {
+        const c = r.split(',');
+        return { q: c[0]?.replace(/"/g,'').trim(), a: c[1]?.replace(/"/g,'').trim() };
+      }).filter(i => i.q && i.q.toLowerCase() !== "question");
+      if (sheetQuestions.length > 0) { isSheetMode = true; startMode(null); }
+    } catch (e) { alert("Error loading sheet."); } finally { document.getElementById('loadingMsg').style.display = 'none'; }
+  }
+
   function nextQuestion() {
     clearInterval(countdown);
     document.getElementById('answer').style.display = 'none';
-    let q, a;
+    let q, a, time = 15;
 
     if (currentMode === 'portfolio') {
-      const p = generatePortfolioQuestion();
-      q = p.q; a = p.a;
-      startTimer(20);
+      const p = generatePortfolioQuestion(); q = p.q; a = p.a; time = 20;
+    } else if (isSheetMode) {
+      const item = sheetQuestions[Math.floor(Math.random() * sheetQuestions.length)];
+      q = item.q; a = item.a;
     } else {
-      // Simple fallback for other modes
-      q = "12 x 12"; a = "144";
-      startTimer(10);
+      const m = modes[currentMode];
+      let v1 = Math.floor(Math.random() * (m.maxA - m.minA + 1)) + m.minA;
+      let v2 = Math.floor(Math.random() * (m.maxB - m.minB + 1)) + m.minB;
+      if (m.op === '-' && v2 > v1) [v1, v2] = [v2, v1];
+      q = `${v1} ${m.op} ${v2}`;
+      a = (m.op === '×') ? v1 * v2 : (m.op === '+') ? v1 + v2 : v1 - v2;
+      time = m.time;
     }
 
     document.getElementById('question').innerHTML = q;
     document.getElementById('answer').textContent = a;
+    startTimer(time);
     speak(q.replace(/<br>/g, ' '));
   }
 
-  function startTimer(seconds) {
-    timeLeft = seconds;
-    document.getElementById('timer').textContent = `Time: ${timeLeft}`;
+  function startTimer(s) {
+    timeLeft = s; document.getElementById('timer').textContent = `Time: ${timeLeft}`;
     countdown = setInterval(() => {
-      timeLeft--;
-      document.getElementById('timer').textContent = `Time: ${timeLeft}`;
+      timeLeft--; document.getElementById('timer').textContent = `Time: ${timeLeft}`;
       if (timeLeft <= 0) clearInterval(countdown);
     }, 1000);
   }
 
   function showAnswer() { document.getElementById('answer').style.display = 'block'; }
-  function backToMenu() {
-    clearInterval(countdown);
-    document.getElementById('questionArea').classList.add('hidden');
-    document.getElementById('menu').classList.remove('hidden');
-  }
-  function speak(t) {
-    const u = new SpeechSynthesisUtterance(t);
-    u.rate = 0.9;
-    speechSynthesis.cancel();
-    speechSynthesis.speak(u);
-  }
+  function backToMenu() { clearInterval(countdown); document.getElementById('questionArea').classList.add('hidden'); document.getElementById('menu').classList.remove('hidden'); }
+  function speak(t) { const u = new SpeechSynthesisUtterance(t); u.rate = 0.9; speechSynthesis.cancel(); speechSynthesis.speak(u); }
 </script>
 </body>
 </html>
