@@ -122,16 +122,61 @@
   }
 
   function generatePortfolioQuestion() {
+    const type = Math.floor(Math.random() * 3); // 0: Scaling, 1: %/Bps, 2: Complex P&L
     const units = [{s:'k',v:1e3}, {s:'m',v:1e6}, {s:'b',v:1e9}];
-    const baseIdx = Math.random() > 0.5 ? 2 : 1; 
-    const uBase = units[baseIdx];
-    const uExp = units[baseIdx - 1];
-    const amtExp = (Math.floor(Math.random() * 90) + 10) * (Math.random() > 0.5 ? 1 : -1);
-    const amtBase = Math.floor(Math.random() * 9) + 1;
-    const qText = Math.random() > 0.5 
-      ? `This is ${amtExp}${uExp.s} of exposure on ${amtBase}${uBase.s} in GMV.`
-      : `The portfolio ${amtExp >= 0 ? 'gained' : 'lost'} ${Math.abs(amtExp)}${uExp.s} on ${amtBase}${uBase.s} in GMV.`;
-    return { q: qText + "<br><br>Basis points?", a: `${((amtExp / amtBase) * 10).toFixed(1)} bps` };
+  
+    if (type === 0) {
+      // 1. Variable Digit Scaling (e.g., 8m vs 75b)
+      const baseIdx = Math.random() > 0.5 ? 2 : 1; 
+      const uBase = units[baseIdx];
+      const uExp = units[baseIdx - 1];
+      
+      // Vary digits: 1-9, 10-99, or 100-999
+      const amtExp = Math.floor(Math.random() * 998) + 1;
+      const amtBase = Math.floor(Math.random() * 998) + 1;
+      
+      const q = `Exposure: ${amtExp}${uExp.s}<br>GMV: ${amtBase}${uBase.s}<br><br>Basis points?`;
+      const a = `${((amtExp / amtBase) * 10).toFixed(2)} bps`;
+      return { q, a };
+  
+    } else if (type === 1) {
+      // 2. Percent & Bps of GMV
+      const isBps = Math.random() > 0.5;
+      const rate = (Math.floor(Math.random() * 17) + 2) / 2; // 1.0 to 9.0 in 0.5 increments
+      const unit = units[Math.floor(Math.random() * 3)];
+      const gmv = [10, 20, 50, 100, 250, 500][Math.floor(Math.random() * 6)];
+      
+      const q = isBps 
+        ? `${rate * 100} bps of ${gmv}${unit.s} GMV?<br>(Dollar amount)`
+        : `${rate}% of ${gmv}${unit.s} GMV?<br>(Dollar amount)`;
+      
+      const rawVal = gmv * (rate / 100);
+      // Formatting: if result is < 1, convert to smaller unit
+      const a = rawVal >= 1 ? `${rawVal.toFixed(2)}${unit.s}` : `${(rawVal * 1000).toFixed(0)}${units[units.indexOf(unit)-1].s}`;
+      return { q, a };
+  
+    } else {
+      // 3. Complex P&L: GMV, Weight, Z-Score, Factor Move
+      const gmvs = [1, 1.5, 2]; // In Billions
+      const weights = [0.005, 0.01, 0.025]; // 0.5%, 1%, 2.5%
+      const zs = [1, 1.5, 2.5];
+      const moves = [0.01, 0.02, 0.05]; // 1%, 2%, 5%
+  
+      const g = gmvs[Math.floor(Math.random() * gmvs.length)];
+      const w = weights[Math.floor(Math.random() * weights.length)];
+      const z = zs[Math.floor(Math.random() * zs.length)];
+      const m = moves[Math.floor(Math.random() * moves.length)];
+  
+      const q = `GMV: $${g}b | Weight: ${(w*100).toFixed(1)}%<br>Z-score: ${z} | Factor Move: ${(m*100).toFixed(0)}%<br><br>Calc: Exp, PnL, & GMV Ret`;
+      
+      // Calculations
+      const exposure = g * 1000 * w * z; // in Millions
+      const pnl = exposure * m; // in Millions
+      const retBps = (pnl / (g * 1000)) * 10000;
+  
+      const a = `Exp: $${exposure.toFixed(1)}m | PnL: $${pnl.toFixed(2)}m | Ret: ${retBps.toFixed(1)} bps`;
+      return { q, a };
+    }
   }
 
   function startMode(modeKey) {
