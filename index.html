@@ -196,6 +196,15 @@
     };
   }
 
+  const funQuestionGenerators = [
+    generateGolfScorecardQuestion
+  ];
+
+  function generateFunQuestion() {
+    const generator = funQuestionGenerators[Math.floor(Math.random() * funQuestionGenerators.length)];
+    return generator();
+  }
+
   function startMode(modeKey) {
     isSheetMode = false; currentMode = modeKey;
     document.getElementById('menu').classList.add('hidden');
@@ -211,7 +220,7 @@
     if (currentMode === 'portfolio') {
       const p = generatePortfolioQuestion(); q = p.q; a = p.a; time = 20;
     } else if (currentMode === 'fun') {
-      const p = generateGolfScorecardQuestion(); q = p.q; a = p.a; time = 20;
+      const p = generateFunQuestion(); q = p.q; a = p.a; time = 20;
     } else if (isSheetMode) {
       const item = sheetQuestions[Math.floor(Math.random() * sheetQuestions.length)];
       q = item.q; a = item.a;
