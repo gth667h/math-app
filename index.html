@@ -21,11 +21,17 @@
     .btn-rules { background-color: #6c757d; color: white; border: none; }
     .btn-sheet { background-color: #34a853; color: white; border: none; }
     .btn-custom { background-color: #9c27b0; color: white; border: none; }
+    .btn-fun { background-color: #fbbc04; color: #222; border: none; }
     
     .question { font-size: 24px; text-align: center; margin: 24px 0; font-weight: bold; min-height: 60px; line-height: 1.4; }
     .answer { font-size: 28px; text-align: center; color: #d93025; margin: 16px 0; display: none; font-weight: bold; border-top: 1px solid #eee; padding-top: 10px; }
     .timer { text-align: center; font-size: 18px; color: #666; font-weight: bold; }
     .loading { font-style: italic; color: #888; text-align: center; display: none; margin-top: 10px; }
+    .scorecard-wrap { overflow-x: auto; margin-top: 12px; }
+    .scorecard { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 18px; }
+    .scorecard th, .scorecard td { border: 1px solid #ddd; padding: 10px 6px; text-align: center; }
+    .scorecard th { background: #f8f9fa; font-size: 13px; color: #555; }
+    .scorecard td { font-weight: 700; }
     
     .rules-list { text-align: left; font-size: 15px; line-height: 1.6; }
     .rules-list h3 { color: #007bff; margin-top: 15px; border-bottom: 2px solid #f0f0f0; }
@@ -49,6 +55,7 @@
     <button onclick="startMode('add3')">3-Digit Addition</button>
     <button onclick="startMode('sub3')">3-Digit Subtraction</button>
     
+    <button class="btn-fun" onclick="startMode('fun')">Fun</button>
     <button class="btn-custom" onclick="startSheetMode()">📝 Custom Questions (from Sheet)</button>
     <div id="loadingMsg" class="loading">Fetching questions...</div>
     
@@ -179,6 +186,16 @@
     }
   }
 
+  function generateGolfScorecardQuestion() {
+    const scores = Array.from({ length: 9 }, () => Math.floor(Math.random() * 5) + 3);
+    const holes = scores.map((_, i) => `<th>H${i + 1}</th>`).join('');
+    const scoreCells = scores.map(score => `<td>${score}</td>`).join('');
+    return {
+      q: `Add the golf scorecard:<div class="scorecard-wrap"><table class="scorecard"><thead><tr>${holes}</tr></thead><tbody><tr>${scoreCells}</tr></tbody></table></div>`,
+      a: scores.reduce((sum, score) => sum + score, 0)
+    };
+  }
+
   function startMode(modeKey) {
     isSheetMode = false; currentMode = modeKey;
     document.getElementById('menu').classList.add('hidden');
@@ -193,6 +210,8 @@
 
     if (currentMode === 'portfolio') {
       const p = generatePortfolioQuestion(); q = p.q; a = p.a; time = 20;
+    } else if (currentMode === 'fun') {
+      const p = generateGolfScorecardQuestion(); q = p.q; a = p.a; time = 20;
     } else if (isSheetMode) {
       const item = sheetQuestions[Math.floor(Math.random() * sheetQuestions.length)];
       q = item.q; a = item.a;
@@ -209,7 +228,7 @@
     document.getElementById('question').innerHTML = q;
     document.getElementById('answer').textContent = a;
     startTimer(time);
-    speak(q.replace(/<br>/g, ' '));
+    speak(stripHtml(q));
   }
 
   function startTimer(s) {
@@ -222,6 +241,7 @@
 
   function showAnswer() { document.getElementById('answer').style.display = 'block'; }
   function backToMenu() { clearInterval(countdown); document.getElementById('questionArea').classList.add('hidden'); document.getElementById('menu').classList.remove('hidden'); }
+  function stripHtml(html) { const div = document.createElement('div'); div.innerHTML = html; return div.textContent || div.innerText || ''; }
   function speak(t) { const u = new SpeechSynthesisUtterance(t); u.rate = 0.9; speechSynthesis.cancel(); speechSynthesis.speak(u); }
 </script>
 </body>
