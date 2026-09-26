@@ -248,8 +248,29 @@
     };
   }
 
+  const fxQuestions = [
+    { currency: 'EUR', rate: 1.15, price: 100 },
+    { currency: 'THB', rate: 0.03, price: 1500 },
+    { currency: 'MXN', rate: 0.05, price: 1500 },
+    { currency: 'ZAR', rate: 0.06, price: 1600 },
+    { currency: 'JPY', rate: 0.006, price: 20000 },
+    { currency: 'CNH', rate: 0.15, price: 80 },
+    { currency: 'AUD', rate: 0.7, price: 20 },
+    { currency: 'CLP', rate: 0.0003, price: 200000 },
+    { currency: 'BRL', rate: 0.19, price: 90 }
+  ];
+
+  function generateFxQuestion() {
+    const item = fxQuestions[Math.floor(Math.random() * fxQuestions.length)];
+    return {
+      q: `FX: ${item.currency} ${item.price.toLocaleString('en-US')} @ ${item.rate}<br>USD?`,
+      a: new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(item.rate * item.price)
+    };
+  }
+
   const funQuestionGenerators = [
-    generateGolfScorecardQuestion
+    generateGolfScorecardQuestion,
+    generateFxQuestion
   ];
 
   function generateFunQuestion() {
