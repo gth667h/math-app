@@ -22,6 +22,8 @@
     .btn-sheet { background-color: #34a853; color: white; border: none; }
     .btn-custom { background-color: #9c27b0; color: white; border: none; }
     .btn-fun { background-color: #fbbc04; color: #222; border: none; }
+    .btn-risk { background-color: #c43d4b; color: white; border: none; }
+    .btn-trivia { background-color: #087f8c; color: white; border: none; }
     
     .question { font-size: 24px; text-align: center; margin: 24px 0; font-weight: bold; min-height: 60px; line-height: 1.4; }
     .answer { font-size: 28px; text-align: center; color: #d93025; margin: 16px 0; display: none; font-weight: bold; border-top: 1px solid #eee; padding-top: 10px; }
@@ -36,6 +38,7 @@
     .rules-list { text-align: left; font-size: 15px; line-height: 1.6; }
     .rules-list h3 { color: #007bff; margin-top: 15px; border-bottom: 2px solid #f0f0f0; }
     .rules-list ul { padding-left: 20px; }
+    .rule-answer { white-space: pre-line; margin-bottom: 18px; }
     
     .hidden { display: none !important; }
   </style>
@@ -45,18 +48,19 @@
 <div class="container">
   <div id="menu">
     <h1>Math Practice</h1>
-    <button class="btn-portfolio" onclick="startMode('portfolio')">📈 Portfolio Math</button>
-    <button class="btn-rules" onclick="showRules()">📖 View Rules</button>
-    <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
-    
-    <button onclick="startMode('m12')">Multiplication 2–12</button>
+    <button class="hidden" onclick="startMode('m12')">Multiplication 2–12</button>
     <button onclick="startMode('m2x1')">2-Digit × 1-Digit</button>
     <button onclick="startMode('m2x2')">2-Digit × 2-Digit</button>
     <button onclick="startMode('add3')">3-Digit Addition</button>
     <button onclick="startMode('sub3')">3-Digit Subtraction</button>
-    
+
+    <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+    <button class="btn-portfolio" onclick="startMode('portfolio')">📈 Portfolio Math</button>
+    <button class="btn-risk" onclick="startSheetMode('risk')">Risk</button>
+    <button class="btn-custom" onclick="startSheetMode('custom')">Custom Math</button>
+    <button class="btn-trivia" onclick="startSheetMode('trivia')">Trivia</button>
     <button class="btn-fun" onclick="startMode('fun')">Fun</button>
-    <button class="btn-custom" onclick="startSheetMode()">📝 Custom Questions (from Sheet)</button>
+    <button class="btn-rules" onclick="showRules()">📖 Rules</button>
     <div id="loadingMsg" class="loading">Fetching questions...</div>
     
     <button class="btn-sheet" onclick="window.open('https://docs.google.com/spreadsheets/d/e/2PACX-1vT4Dugmd2CtGnRreZoVHbDqlNiWi6t-xxMgIvoyU8KW1ueQxtL3TiI9YKuHcIjXNSd_Zkqf8V6VxaeE/pubhtml', '_blank')">
@@ -65,20 +69,8 @@
   </div>
 
   <div id="rulesArea" class="card hidden">
-    <h2>Math Shortcuts</h2>
-    <div class="rules-list">
-      <h3>1. Bps Math</h3>
-      <ul>
-        <li><strong>Percents:</strong> Multiply first digit, drop level, add 1 zero.</li>
-        <li><strong>Bps:</strong> Multiply, drop a level, drop 1 zero.</li>
-        <li><strong>Scale:</strong> 1k is 10 bps of 1m; 1m is 10 bps of 1b.</li>
-      </ul>
-      <h3>2. Big Math</h3>
-      <ul>
-        <li><strong>Levels:</strong> k (1), m (2), b (3).</li>
-        <li><strong>Scaling:</strong> 150k ppl × 100k: Up 1 level for k, 2 for m. Multiply front digits and add zero places.</li>
-      </ul>
-    </div>
+    <h2>Rules</h2>
+    <div class="rules-list" id="rulesList"></div>
     <button onclick="hideRules()">Back to Menu</button>
   </div>
 
@@ -103,29 +95,89 @@
     sub3: { minA: 100, maxA: 999, minB: 100, maxB: 999, op: '-', time: 15 }
   };
 
-  function showRules() { document.getElementById('menu').classList.add('hidden'); document.getElementById('rulesArea').classList.remove('hidden'); }
+  const publishedSheetBase = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT4Dugmd2CtGnRreZoVHbDqlNiWi6t-xxMgIvoyU8KW1ueQxtL3TiI9YKuHcIjXNSd_Zkqf8V6VxaeE/pub';
+  const sheetTabs = {
+    custom: { gid: '0', label: 'Custom Math' },
+    risk: { gid: '1461466739', label: 'Risk' },
+    trivia: { gid: '2088230511', label: 'Trivia' },
+    rules: { gid: '1089592861', label: 'Rules' }
+  };
+
+  function parseCsv(data) {
+    const rows = [];
+    let row = [], field = '', inQuotes = false;
+
+    for (let i = 0; i < data.length; i++) {
+      const char = data[i];
+      if (char === '"') {
+        if (inQuotes && data[i + 1] === '"') { field += '"'; i++; }
+        else { inQuotes = !inQuotes; }
+      } else if (char === ',' && !inQuotes) {
+        row.push(field); field = '';
+      } else if ((char === '\n' || char === '\r') && !inQuotes) {
+        if (char === '\r' && data[i + 1] === '\n') i++;
+        row.push(field); rows.push(row); row = []; field = '';
+      } else {
+        field += char;
+      }
+    }
+
+    if (field || row.length) { row.push(field); rows.push(row); }
+    return rows;
+  }
+
+  function getQuestionRows(rows) {
+    const headerIndex = rows.findIndex(row => row[0]?.trim().toLowerCase() === 'question');
+    const dataRows = headerIndex >= 0 ? rows.slice(headerIndex + 1) : rows;
+    return dataRows
+      .map(row => ({ q: row[0]?.trim(), a: row[1]?.trim() }))
+      .filter(item => item.q && item.q.toLowerCase() !== 'question');
+  }
+
+  async function fetchSheetItems(tabKey) {
+    const tab = sheetTabs[tabKey];
+    const response = await fetch(`${publishedSheetBase}?gid=${tab.gid}&single=true&output=csv`);
+    if (!response.ok) throw new Error(`Unable to load ${tab.label}`);
+    return getQuestionRows(parseCsv(await response.text()));
+  }
+
+  async function showRules() {
+    const loading = document.getElementById('loadingMsg');
+    loading.textContent = 'Fetching Rules...'; loading.style.display = 'block';
+    try {
+      const rules = await fetchSheetItems('rules');
+      const rulesList = document.getElementById('rulesList');
+      rulesList.innerHTML = rules.map(rule =>
+        `<h3>${escapeHtml(rule.q)}</h3>${rule.a ? `<div class="rule-answer">${escapeHtml(rule.a)}</div>` : ''}`
+      ).join('');
+      document.getElementById('menu').classList.add('hidden');
+      document.getElementById('rulesArea').classList.remove('hidden');
+    } catch (error) {
+      alert('Error accessing the Rules sheet.');
+    } finally {
+      loading.style.display = 'none'; loading.textContent = 'Fetching questions...';
+    }
+  }
+
   function hideRules() { document.getElementById('rulesArea').classList.add('hidden'); document.getElementById('menu').classList.remove('hidden'); }
 
-  // Restored CSV parser with row handling
-  async function startSheetMode() {
-    document.getElementById('loadingMsg').style.display = 'block';
-    const csvUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vT4Dugmd2CtGnRreZoVHbDqlNiWi6t-xxMgIvoyU8KW1ueQxtL3TiI9YKuHcIjXNSd_Zkqf8V6VxaeE/pub?output=csv`;
+  async function startSheetMode(tabKey) {
+    const loading = document.getElementById('loadingMsg');
+    loading.textContent = `Fetching ${sheetTabs[tabKey].label} questions...`;
+    loading.style.display = 'block';
     try {
-      const resp = await fetch(csvUrl);
-      const data = await resp.text();
-      const rows = data.split(/\r?\n/);
-      sheetQuestions = rows.map(r => {
-        const c = r.split(',');
-        return { q: c[0]?.replace(/"/g,'').trim(), a: c[1]?.replace(/"/g,'').trim() };
-      }).filter(i => i.q && i.q.toLowerCase() !== "question");
-      
+      sheetQuestions = await fetchSheetItems(tabKey);
       if (sheetQuestions.length > 0) {
         isSheetMode = true; currentMode = null;
         document.getElementById('menu').classList.add('hidden');
         document.getElementById('questionArea').classList.remove('hidden');
         nextQuestion();
-      } else { alert("No questions found in sheet."); }
-    } catch (e) { alert("Error accessing sheet."); } finally { document.getElementById('loadingMsg').style.display = 'none'; }
+      } else { alert(`No questions found in ${sheetTabs[tabKey].label}.`); }
+    } catch (error) {
+      alert(`Error accessing the ${sheetTabs[tabKey].label} sheet.`);
+    } finally {
+      loading.style.display = 'none'; loading.textContent = 'Fetching questions...';
+    }
   }
 
   function generatePortfolioQuestion() {
@@ -223,7 +275,7 @@
       const p = generateFunQuestion(); q = p.q; a = p.a; time = 20;
     } else if (isSheetMode) {
       const item = sheetQuestions[Math.floor(Math.random() * sheetQuestions.length)];
-      q = item.q; a = item.a;
+      q = escapeHtml(item.q).replace(/\n/g, '<br>'); a = item.a;
     } else {
       const m = modes[currentMode];
       let v1 = Math.floor(Math.random() * (m.maxA - m.minA + 1)) + m.minA;
@@ -250,6 +302,7 @@
 
   function showAnswer() { document.getElementById('answer').style.display = 'block'; }
   function backToMenu() { clearInterval(countdown); document.getElementById('questionArea').classList.add('hidden'); document.getElementById('menu').classList.remove('hidden'); }
+  function escapeHtml(text) { const div = document.createElement('div'); div.textContent = text ?? ''; return div.innerHTML; }
   function stripHtml(html) { const div = document.createElement('div'); div.innerHTML = html; return div.textContent || div.innerText || ''; }
   function speak(t) { const u = new SpeechSynthesisUtterance(t); u.rate = 0.9; speechSynthesis.cancel(); speechSynthesis.speak(u); }
 </script>
