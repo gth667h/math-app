@@ -59,6 +59,7 @@
     <button class="btn-risk" onclick="startSheetMode('risk')">Risk</button>
     <button class="btn-custom" onclick="startSheetMode('custom')">Custom Math</button>
     <button class="btn-trivia" onclick="startSheetMode('trivia')">Trivia</button>
+    <button class="btn-custom" onclick="SpanishApp.open()">🇪🇸 Spanish</button>
     <button class="btn-fun" onclick="startMode('fun')">Fun</button>
     <button class="btn-rules" onclick="showRules()">📖 Rules</button>
     <div id="loadingMsg" class="loading">Fetching questions...</div>
@@ -327,5 +328,6 @@
   function stripHtml(html) { const div = document.createElement('div'); div.innerHTML = html; return div.textContent || div.innerText || ''; }
   function speak(t) { const u = new SpeechSynthesisUtterance(t); u.rate = 0.9; speechSynthesis.cancel(); speechSynthesis.speak(u); }
 </script>
+<script src="spanish.js"></script>
 </body>
 </html>

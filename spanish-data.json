@@ -1,0 +1,833 @@
+{
+  "version": 1,
+  "tabs": [
+    {
+      "key": "sentences",
+      "title": "Spanish Sentences",
+      "id": 1761700101,
+      "headers": [
+        "English",
+        "Spanish",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "how was your weekend?",
+          "¿Cómo estuvo tu fin de semana?",
+          ""
+        ],
+        [
+          "my mom taught me spanish when I was a kid.",
+          "Mi mamá me enseñó español cuando era niño.",
+          "Use niña for a female speaker."
+        ]
+      ]
+    },
+    {
+      "key": "nouns",
+      "title": "Spanish Nouns",
+      "id": 1761700102,
+      "headers": [
+        "English",
+        "Spanish",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "leg",
+          "la pierna",
+          ""
+        ],
+        [
+          "sock",
+          "el calcetín",
+          ""
+        ],
+        [
+          "babysitter",
+          "la niñera / el niñero",
+          "Choose the form for the person."
+        ]
+      ]
+    },
+    {
+      "key": "adjectives",
+      "title": "Spanish Adjectives",
+      "id": 1761700103,
+      "headers": [
+        "English",
+        "Spanish",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "long",
+          "largo / larga",
+          "Agrees with the noun."
+        ]
+      ]
+    },
+    {
+      "key": "pronouns",
+      "title": "Spanish Pronouns",
+      "id": 1761700104,
+      "headers": [
+        "English",
+        "Spanish",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "friendly",
+          "amable",
+          "Friendly is an adjective, retained here as requested."
+        ],
+        [
+          "I",
+          "yo",
+          "Subject pronoun."
+        ],
+        [
+          "you (informal singular)",
+          "tú",
+          "Subject pronoun."
+        ],
+        [
+          "he",
+          "él",
+          "Subject pronoun."
+        ],
+        [
+          "we",
+          "nosotros / nosotras",
+          "Subject pronoun."
+        ],
+        [
+          "they",
+          "ellos / ellas",
+          "Subject pronoun."
+        ]
+      ]
+    },
+    {
+      "key": "conjunctions",
+      "title": "Spanish Conjunctions",
+      "id": 1761700105,
+      "headers": [
+        "English",
+        "Spanish",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "both",
+          "tanto … como …",
+          "Both … and …: tanto Ana como Luis. Ambos / ambas means both as a determiner or pronoun."
+        ]
+      ]
+    },
+    {
+      "key": "adverbs",
+      "title": "Spanish Adverbs",
+      "id": 1761700106,
+      "headers": [
+        "English",
+        "Spanish",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "very",
+          "muy",
+          ""
+        ]
+      ]
+    },
+    {
+      "key": "verbs",
+      "title": "Spanish Verbs",
+      "id": 1761700107,
+      "headers": [
+        "English",
+        "Spanish",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "help",
+          "ayudar",
+          ""
+        ],
+        [
+          "teach",
+          "enseñar",
+          ""
+        ],
+        [
+          "give",
+          "dar",
+          ""
+        ],
+        [
+          "to be (estar)",
+          "estar",
+          ""
+        ],
+        [
+          "to be (ser)",
+          "ser",
+          ""
+        ],
+        [
+          "go",
+          "ir",
+          ""
+        ],
+        [
+          "clap",
+          "aplaudir",
+          ""
+        ],
+        [
+          "walk",
+          "caminar",
+          ""
+        ]
+      ]
+    },
+    {
+      "key": "conjugations",
+      "title": "Spanish Conjugations",
+      "id": 1761700108,
+      "headers": [
+        "English",
+        "Spanish",
+        "Tense",
+        "Yo",
+        "Tú",
+        "Él / Usted",
+        "Nosotros",
+        "Ellos / Ustedes",
+        "Notes"
+      ],
+      "rows": [
+        [
+          "help",
+          "ayudar",
+          "present",
+          "ayudo",
+          "ayudas",
+          "ayuda",
+          "ayudamos",
+          "ayudan",
+          ""
+        ],
+        [
+          "help",
+          "ayudar",
+          "preterit",
+          "ayudé",
+          "ayudaste",
+          "ayudó",
+          "ayudamos",
+          "ayudaron",
+          ""
+        ],
+        [
+          "help",
+          "ayudar",
+          "imperfect",
+          "ayudaba",
+          "ayudabas",
+          "ayudaba",
+          "ayudábamos",
+          "ayudaban",
+          ""
+        ],
+        [
+          "help",
+          "ayudar",
+          "future",
+          "ayudaré",
+          "ayudarás",
+          "ayudará",
+          "ayudaremos",
+          "ayudarán",
+          ""
+        ],
+        [
+          "help",
+          "ayudar",
+          "imperative",
+          "—",
+          "ayuda",
+          "ayude",
+          "ayudemos",
+          "ayuden",
+          "Affirmative commands: tú, usted, nosotros, ustedes; no yo form."
+        ],
+        [
+          "help",
+          "ayudar",
+          "perfect",
+          "he ayudado",
+          "has ayudado",
+          "ha ayudado",
+          "hemos ayudado",
+          "han ayudado",
+          "Present perfect: haber + past participle."
+        ],
+        [
+          "help",
+          "ayudar",
+          "progressive",
+          "estoy ayudando",
+          "estás ayudando",
+          "está ayudando",
+          "estamos ayudando",
+          "están ayudando",
+          "Present progressive: estar + gerund."
+        ],
+        [
+          "teach",
+          "enseñar",
+          "present",
+          "enseño",
+          "enseñas",
+          "enseña",
+          "enseñamos",
+          "enseñan",
+          ""
+        ],
+        [
+          "teach",
+          "enseñar",
+          "preterit",
+          "enseñé",
+          "enseñaste",
+          "enseñó",
+          "enseñamos",
+          "enseñaron",
+          ""
+        ],
+        [
+          "teach",
+          "enseñar",
+          "imperfect",
+          "enseñaba",
+          "enseñabas",
+          "enseñaba",
+          "enseñábamos",
+          "enseñaban",
+          ""
+        ],
+        [
+          "teach",
+          "enseñar",
+          "future",
+          "enseñaré",
+          "enseñarás",
+          "enseñará",
+          "enseñaremos",
+          "enseñarán",
+          ""
+        ],
+        [
+          "teach",
+          "enseñar",
+          "imperative",
+          "—",
+          "enseña",
+          "enseñe",
+          "enseñemos",
+          "enseñen",
+          "Affirmative commands: tú, usted, nosotros, ustedes; no yo form."
+        ],
+        [
+          "teach",
+          "enseñar",
+          "perfect",
+          "he enseñado",
+          "has enseñado",
+          "ha enseñado",
+          "hemos enseñado",
+          "han enseñado",
+          "Present perfect: haber + past participle."
+        ],
+        [
+          "teach",
+          "enseñar",
+          "progressive",
+          "estoy enseñando",
+          "estás enseñando",
+          "está enseñando",
+          "estamos enseñando",
+          "están enseñando",
+          "Present progressive: estar + gerund."
+        ],
+        [
+          "give",
+          "dar",
+          "present",
+          "doy",
+          "das",
+          "da",
+          "damos",
+          "dan",
+          ""
+        ],
+        [
+          "give",
+          "dar",
+          "preterit",
+          "di",
+          "diste",
+          "dio",
+          "dimos",
+          "dieron",
+          ""
+        ],
+        [
+          "give",
+          "dar",
+          "imperfect",
+          "daba",
+          "dabas",
+          "daba",
+          "dábamos",
+          "daban",
+          ""
+        ],
+        [
+          "give",
+          "dar",
+          "future",
+          "daré",
+          "darás",
+          "dará",
+          "daremos",
+          "darán",
+          ""
+        ],
+        [
+          "give",
+          "dar",
+          "imperative",
+          "—",
+          "da",
+          "dé",
+          "demos",
+          "den",
+          "Affirmative commands: tú, usted, nosotros, ustedes; no yo form."
+        ],
+        [
+          "give",
+          "dar",
+          "perfect",
+          "he dado",
+          "has dado",
+          "ha dado",
+          "hemos dado",
+          "han dado",
+          "Present perfect: haber + past participle."
+        ],
+        [
+          "give",
+          "dar",
+          "progressive",
+          "estoy dando",
+          "estás dando",
+          "está dando",
+          "estamos dando",
+          "están dando",
+          "Present progressive: estar + gerund."
+        ],
+        [
+          "to be (estar)",
+          "estar",
+          "present",
+          "estoy",
+          "estás",
+          "está",
+          "estamos",
+          "están",
+          ""
+        ],
+        [
+          "to be (estar)",
+          "estar",
+          "preterit",
+          "estuve",
+          "estuviste",
+          "estuvo",
+          "estuvimos",
+          "estuvieron",
+          ""
+        ],
+        [
+          "to be (estar)",
+          "estar",
+          "imperfect",
+          "estaba",
+          "estabas",
+          "estaba",
+          "estábamos",
+          "estaban",
+          ""
+        ],
+        [
+          "to be (estar)",
+          "estar",
+          "future",
+          "estaré",
+          "estarás",
+          "estará",
+          "estaremos",
+          "estarán",
+          ""
+        ],
+        [
+          "to be (estar)",
+          "estar",
+          "imperative",
+          "—",
+          "está",
+          "esté",
+          "estemos",
+          "estén",
+          "Affirmative commands: tú, usted, nosotros, ustedes; no yo form."
+        ],
+        [
+          "to be (estar)",
+          "estar",
+          "perfect",
+          "he estado",
+          "has estado",
+          "ha estado",
+          "hemos estado",
+          "han estado",
+          "Present perfect: haber + past participle."
+        ],
+        [
+          "to be (estar)",
+          "estar",
+          "progressive",
+          "estoy estando",
+          "estás estando",
+          "está estando",
+          "estamos estando",
+          "están estando",
+          "Present progressive: estar + gerund. Estar + estando is grammatical but uncommon; simple estar is usually more natural."
+        ],
+        [
+          "to be (ser)",
+          "ser",
+          "present",
+          "soy",
+          "eres",
+          "es",
+          "somos",
+          "son",
+          ""
+        ],
+        [
+          "to be (ser)",
+          "ser",
+          "preterit",
+          "fui",
+          "fuiste",
+          "fue",
+          "fuimos",
+          "fueron",
+          ""
+        ],
+        [
+          "to be (ser)",
+          "ser",
+          "imperfect",
+          "era",
+          "eras",
+          "era",
+          "éramos",
+          "eran",
+          ""
+        ],
+        [
+          "to be (ser)",
+          "ser",
+          "future",
+          "seré",
+          "serás",
+          "será",
+          "seremos",
+          "serán",
+          ""
+        ],
+        [
+          "to be (ser)",
+          "ser",
+          "imperative",
+          "—",
+          "sé",
+          "sea",
+          "seamos",
+          "sean",
+          "Affirmative commands: tú, usted, nosotros, ustedes; no yo form."
+        ],
+        [
+          "to be (ser)",
+          "ser",
+          "perfect",
+          "he sido",
+          "has sido",
+          "ha sido",
+          "hemos sido",
+          "han sido",
+          "Present perfect: haber + past participle."
+        ],
+        [
+          "to be (ser)",
+          "ser",
+          "progressive",
+          "estoy siendo",
+          "estás siendo",
+          "está siendo",
+          "estamos siendo",
+          "están siendo",
+          "Present progressive: estar + gerund. Ser in the progressive describes temporary behavior."
+        ],
+        [
+          "go",
+          "ir",
+          "present",
+          "voy",
+          "vas",
+          "va",
+          "vamos",
+          "van",
+          ""
+        ],
+        [
+          "go",
+          "ir",
+          "preterit",
+          "fui",
+          "fuiste",
+          "fue",
+          "fuimos",
+          "fueron",
+          ""
+        ],
+        [
+          "go",
+          "ir",
+          "imperfect",
+          "iba",
+          "ibas",
+          "iba",
+          "íbamos",
+          "iban",
+          ""
+        ],
+        [
+          "go",
+          "ir",
+          "future",
+          "iré",
+          "irás",
+          "irá",
+          "iremos",
+          "irán",
+          ""
+        ],
+        [
+          "go",
+          "ir",
+          "imperative",
+          "—",
+          "ve",
+          "vaya",
+          "vayamos / vamos",
+          "vayan",
+          "Affirmative commands: tú, usted, nosotros, ustedes; no yo form."
+        ],
+        [
+          "go",
+          "ir",
+          "perfect",
+          "he ido",
+          "has ido",
+          "ha ido",
+          "hemos ido",
+          "han ido",
+          "Present perfect: haber + past participle."
+        ],
+        [
+          "go",
+          "ir",
+          "progressive",
+          "estoy yendo",
+          "estás yendo",
+          "está yendo",
+          "estamos yendo",
+          "están yendo",
+          "Present progressive: estar + gerund."
+        ],
+        [
+          "clap",
+          "aplaudir",
+          "present",
+          "aplaudo",
+          "aplaudes",
+          "aplaude",
+          "aplaudimos",
+          "aplauden",
+          ""
+        ],
+        [
+          "clap",
+          "aplaudir",
+          "preterit",
+          "aplaudí",
+          "aplaudiste",
+          "aplaudió",
+          "aplaudimos",
+          "aplaudieron",
+          ""
+        ],
+        [
+          "clap",
+          "aplaudir",
+          "imperfect",
+          "aplaudía",
+          "aplaudías",
+          "aplaudía",
+          "aplaudíamos",
+          "aplaudían",
+          ""
+        ],
+        [
+          "clap",
+          "aplaudir",
+          "future",
+          "aplaudiré",
+          "aplaudirás",
+          "aplaudirá",
+          "aplaudiremos",
+          "aplaudirán",
+          ""
+        ],
+        [
+          "clap",
+          "aplaudir",
+          "imperative",
+          "—",
+          "aplaude",
+          "aplauda",
+          "aplaudamos",
+          "aplaudan",
+          "Affirmative commands: tú, usted, nosotros, ustedes; no yo form."
+        ],
+        [
+          "clap",
+          "aplaudir",
+          "perfect",
+          "he aplaudido",
+          "has aplaudido",
+          "ha aplaudido",
+          "hemos aplaudido",
+          "han aplaudido",
+          "Present perfect: haber + past participle."
+        ],
+        [
+          "clap",
+          "aplaudir",
+          "progressive",
+          "estoy aplaudiendo",
+          "estás aplaudiendo",
+          "está aplaudiendo",
+          "estamos aplaudiendo",
+          "están aplaudiendo",
+          "Present progressive: estar + gerund."
+        ],
+        [
+          "walk",
+          "caminar",
+          "present",
+          "camino",
+          "caminas",
+          "camina",
+          "caminamos",
+          "caminan",
+          ""
+        ],
+        [
+          "walk",
+          "caminar",
+          "preterit",
+          "caminé",
+          "caminaste",
+          "caminó",
+          "caminamos",
+          "caminaron",
+          ""
+        ],
+        [
+          "walk",
+          "caminar",
+          "imperfect",
+          "caminaba",
+          "caminabas",
+          "caminaba",
+          "caminábamos",
+          "caminaban",
+          ""
+        ],
+        [
+          "walk",
+          "caminar",
+          "future",
+          "caminaré",
+          "caminarás",
+          "caminará",
+          "caminaremos",
+          "caminarán",
+          ""
+        ],
+        [
+          "walk",
+          "caminar",
+          "imperative",
+          "—",
+          "camina",
+          "camine",
+          "caminemos",
+          "caminen",
+          "Affirmative commands: tú, usted, nosotros, ustedes; no yo form."
+        ],
+        [
+          "walk",
+          "caminar",
+          "perfect",
+          "he caminado",
+          "has caminado",
+          "ha caminado",
+          "hemos caminado",
+          "han caminado",
+          "Present perfect: haber + past participle."
+        ],
+        [
+          "walk",
+          "caminar",
+          "progressive",
+          "estoy caminando",
+          "estás caminando",
+          "está caminando",
+          "estamos caminando",
+          "están caminando",
+          "Present progressive: estar + gerund."
+        ]
+      ]
+    }
+  ]
+}
