@@ -11,6 +11,10 @@
     assert(!SpanishCore.isDue(testState.reviews.wrong,testState,0),'Wrong is not due after four other grades');
     SpanishCore.grade(testState,'fifth',true,0);
     assert(SpanishCore.isDue(testState.reviews.wrong,testState,0),'Wrong is due after five other grades');
+    const setState={attempts:0,reviews:{}};
+    SpanishCore.gradeMany(setState,['verb1','verb2','verb3'],false,0);
+    assert(setState.attempts===1,'A three-verb set counts as one graded question');
+    assert(['verb1','verb2','verb3'].every(id=>setState.reviews[id].dueAttempt===6),'All wrong verbs return after five more grades');
     const jan31=new Date(2026,0,31,10).getTime(), feb28=new Date(2026,1,28,10).getTime();
     assert(SpanishCore.nextMonth(jan31)===feb28,'Monthly scheduling clamps January 31 to February 28');
     SpanishCore.grade(testState,'right',true,jan31);
@@ -41,12 +45,21 @@
     }
     click('mode','reverse');click('select','reverse');click('reveal');
     assert(document.getElementById('spAnswer').textContent.includes('how was your weekend?'),'Spanish to English uses the shared sentence list');
-    click('cardBack');click('home');click('mode','verbs');click('select','verbs');
+    click('cardBack');click('home');click('mode','verbs');
     for(const tense of ['present','preterit','imperfect','future','imperative','perfect','progressive']) {
-      click('tense',tense);click('reveal');assert(document.querySelectorAll('.sp-table tbody tr').length===5,tense+' shows five subject rows');click('right');click('cardBack');
+      click('tense',tense);
+      const verbNames=[...document.querySelectorAll('#spanishArea .question')][0].textContent.split('\n').filter(line=>/^\d+\./.test(line));
+      assert(verbNames.length===3&&new Set(verbNames).size===3,tense+' prompts three distinct verbs');
+      click('reveal');
+      assert(document.querySelectorAll('.sp-verb-block').length===3,tense+' reveals three verb tables');
+      assert(document.querySelectorAll('.sp-table tbody tr').length===15,tense+' shows fifteen subject rows');
+      const attemptsBefore=JSON.parse(localStorage.getItem('math-app.spanish.v1')).attempts;
+      click('right');
+      assert(JSON.parse(localStorage.getItem('math-app.spanish.v1')).attempts===attemptsBefore+1,tense+' set counts as one attempt');
+      click('cardBack');
       assert(document.querySelectorAll('[data-action="tense"]').length===7,'Back returns to tense choices for '+tense);
     }
-    click('mode','verbs');click('home');click('mode','sentences');document.getElementById('spNew').value='Today I walked to the park.';click('translateNew','sentences');await tick();
+    click('home');click('mode','sentences');document.getElementById('spNew').value='Today I walked to the park.';click('translateNew','sentences');await tick();
     assert(document.getElementById('spAnswer').textContent.includes('Hoy caminé al parque.'),'New sentence is translated and revealed');
     assert(JSON.parse(localStorage.getItem('math-app.spanish.v1')).additions.length===1,'New sentence is saved automatically');
     click('wrong');click('cardBack');click('home');click('mode','sentences');document.getElementById('spNew').value='  TODAY I WALKED TO THE PARK.  ';click('translateNew','sentences');await tick();

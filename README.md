@@ -15,7 +15,7 @@ Select or type an English entry, translate/reveal it, then self-grade. New text 
 - Right: due one calendar month later, with dates clamped to the last valid day of the next month.
 - Wrong: due after five **other graded Spanish questions**, counted across modes and sessions. Reveal, navigation, and repeated clicks do not count.
 - Due entries are chosen randomly. Returning from a graded card opens a due review when one exists; the menu also provides a review button. Reviews require opening and using the app; there are no background notifications.
-- English sentence identity is shared between the two translation directions. Each verb/tense set has its own review record and one grade for all five subjects.
+- English sentence identity is shared between the two translation directions. A verb exercise selects one tense and three distinct random verbs. One grade applies to the full three-verb set, while each verb/tense pair keeps its own review record.
 - Future reviews are excluded from random practice; manual selection remains available.
 
 New entries and review history persist in local storage on the current browser/device, not in Google Sheets. Download/restore JSON backups to transfer them. Restore merges entries and rebases question-count deadlines; incoming records take precedence for matching keys. The static GitHub Pages app has no authenticated Sheets write endpoint, so automatic writes back to the workbook are not implemented.

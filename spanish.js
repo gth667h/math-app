@@ -10,13 +10,17 @@ const SpanishCore = (() => {
     date.setDate(Math.min(day, last)); return date.getTime();
   }
   function grade(state, id, right, now = Date.now()) {
+    gradeMany(state, [id], right, now);
+  }
+  function gradeMany(state, ids, right, now = Date.now()) {
     state.attempts++;
-    state.reviews[id] = right
+    const review = right
       ? { right: true, dueAt: nextMonth(now) }
       : { right: false, dueAttempt: state.attempts + 5 };
+    ids.forEach(id => { state.reviews[id] = {...review}; });
   }
   const isDue = (review, state, now = Date.now()) => review && (review.right ? now >= review.dueAt : state.attempts >= review.dueAttempt);
-  return { normalize, key, nextMonth, grade, isDue };
+  return { normalize, key, nextMonth, grade, gradeMany, isDue };
 })();
 
 const SpanishApp = (() => {
@@ -24,7 +28,7 @@ const SpanishApp = (() => {
   const labels = {sentences:'Say a sentence about my day', reverse:'Spanish → English sentences', verbs:'Conjugate a verb', nouns:'One noun', adjectives:'One adjective', pronouns:'One pronoun', conjunctions:'One conjunction', adverbs:'One adverb'};
   const tenses = {present:'Present · I do', preterit:'Preterit · I did', imperfect:'Imperfect · I used to', future:'Future · I will', imperative:'Imperative · do this', perfect:'Perfect · I have done', progressive:'Progressive · I am doing'};
   const subjects = ['yo', 'tú', 'él / ella / usted', 'nosotros / nosotras', 'ellos / ellas / ustedes'];
-  let state = {version:1, attempts:0, additions:[], reviews:{}}, seed, root, current, view, verb, warning = '', loadMessage = '', requestId = 0;
+  let state = {version:1, attempts:0, additions:[], reviews:{}}, seed, root, current, view, warning = '', loadMessage = '', requestId = 0;
   const $ = id => document.getElementById(id);
   const esc = text => String(text ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const button = (action, label, value = '', extra = '') => `<button type="button" data-action="${action}" data-value="${esc(value)}" ${extra}>${esc(label)}</button>`;
@@ -53,6 +57,14 @@ const SpanishApp = (() => {
   const idOf = card => SpanishCore.key(card.kind, card.english, card.tense);
   const dueCards = () => cards().filter(c => SpanishCore.isDue(state.reviews[idOf(c)], state));
   const choose = list => list[Math.floor(Math.random() * list.length)];
+  function sample(list, count) {
+    const pool = [...list];
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    return pool.slice(0, count);
+  }
   function render(body) {
     root.innerHTML = `<h2>Spanish</h2>${warning ? `<p role="alert">${esc(warning)}</p>` : ''}<div id="spStatus" role="status" aria-live="polite"></div>${body}`;
   }
@@ -65,7 +77,7 @@ const SpanishApp = (() => {
     if (!root) {
       root = document.createElement('section'); root.id = 'spanishArea'; root.className = 'card'; root.setAttribute('aria-label','Spanish practice');
       document.querySelector('.container').appendChild(root);
-      const style = document.createElement('style'); style.textContent = '#spanishArea input,#spanishArea select,#spanishArea textarea{box-sizing:border-box;width:100%;padding:12px;font:inherit;margin:8px 0;border:1px solid #aaa;border-radius:8px}#spanishArea .sp-small{font-size:14px;color:#555;line-height:1.5}.sp-label{display:block;margin-top:16px}.sp-answer{font-size:24px;white-space:pre-line;overflow-wrap:anywhere;margin:20px 0}.sp-grades{display:flex;gap:12px}.sp-right{background:#d8f0dc}.sp-wrong{background:#fde0de}.sp-table{width:100%;border-collapse:collapse}.sp-table td,.sp-table th{padding:10px 5px;border-bottom:1px solid #ddd;text-align:left;overflow-wrap:anywhere}#spStatus{white-space:pre-line;line-height:1.5}#spanishArea button:disabled{opacity:.5;cursor:default}'; document.head.appendChild(style);
+      const style = document.createElement('style'); style.textContent = '#spanishArea input,#spanishArea select,#spanishArea textarea{box-sizing:border-box;width:100%;padding:12px;font:inherit;margin:8px 0;border:1px solid #aaa;border-radius:8px}#spanishArea .sp-small{font-size:14px;color:#555;line-height:1.5}.sp-label{display:block;margin-top:16px}.sp-answer{font-size:24px;white-space:pre-line;overflow-wrap:anywhere;margin:20px 0}.sp-grades{display:flex;gap:12px}.sp-right{background:#d8f0dc}.sp-wrong{background:#fde0de}.sp-verb-block{margin:22px 0}.sp-verb-block h4{margin-bottom:6px}.sp-table{width:100%;border-collapse:collapse}.sp-table td,.sp-table th{padding:10px 5px;border-bottom:1px solid #ddd;text-align:left;overflow-wrap:anywhere}#spStatus{white-space:pre-line;line-height:1.5}#spanishArea button:disabled{opacity:.5;cursor:default}'; document.head.appendChild(style);
       root.addEventListener('click', event => {const target = event.target.closest('button[data-action]'); if (target && !target.disabled) act(target.dataset.action, target.dataset.value).catch(error => {if ($('spStatus')) $('spStatus').textContent = error.message;});});
       root.addEventListener('change', event => {if(event.target.id === 'spImport') restore(event.target.files[0]);});
     }
@@ -91,32 +103,43 @@ const SpanishApp = (() => {
   }
   function mode(kind) {
     requestId++; view = kind; current = null;
+    if (kind === 'verbs') { verbMenu(); return; }
     const source = kind === 'reverse' ? 'sentences' : kind, list = items(source);
-    render(`<h3>${esc(labels[kind])}</h3><label for="spSelect">Choose ${kind === 'verbs' ? 'a verb' : 'an entry'}</label><select id="spSelect">${list.map((c,i)=>`<option value="${i}">${esc(kind === 'reverse' ? c.spanish : c.english)}</option>`).join('')}</select>${button('select',kind === 'verbs' ? 'Choose tense' : 'Practice selected',kind)}${button('random','Random eligible entry',kind)}${kind !== 'reverse' && kind !== 'verbs' ? `<label for="spNew">Or type a new English ${kind === 'sentences' ? 'sentence' : 'word'}</label><textarea id="spNew" rows="2" maxlength="450"></textarea><p class="sp-small">Translate sends only this text to MyMemory. Saved entries use their existing translation.</p>${button('translateNew','Translate & save to my list',source)}` : ''}${button('home','Back to Spanish menu')}`);
+    render(`<h3>${esc(labels[kind])}</h3><label for="spSelect">Choose an entry</label><select id="spSelect">${list.map((c,i)=>`<option value="${i}">${esc(kind === 'reverse' ? c.spanish : c.english)}</option>`).join('')}</select>${button('select','Practice selected',kind)}${button('random','Random eligible entry',kind)}${kind !== 'reverse' ? `<label for="spNew">Or type a new English ${kind === 'sentences' ? 'sentence' : 'word'}</label><textarea id="spNew" rows="2" maxlength="450"></textarea><p class="sp-small">Translate sends only this text to MyMemory. Saved entries use their existing translation.</p>${button('translateNew','Translate & save to my list',source)}` : ''}${button('home','Back to Spanish menu')}`);
   }
   function selectCard(card, reverse = false, review = false) {
     requestId++; current = {...card,reverse,review,revealed:false,graded:false};
     const question = card.kind === 'verbs' ? `${card.english} · ${card.spanish}\n${tenses[card.tense]}\nConjugate for yo, tú, él, nosotros, ellos.` : reverse ? card.spanish : card.english;
     render(`<h3>${review ? 'Scheduled review' : esc(labels[reverse ? 'reverse' : card.kind])}</h3><div class="question" style="white-space:pre-line" ${reverse ? 'lang="es"' : ''}>${esc(question)}</div>${button('reveal', card.kind === 'verbs' ? 'Show' : 'Translate')}<div id="spAnswer" class="hidden" aria-live="polite"></div><div id="spGrades" class="sp-grades hidden">${button('right','Right','','class="sp-right"')}${button('wrong','Wrong','','class="sp-wrong"')}</div>${button('cardBack',card.kind === 'verbs' && !review ? 'Back to tenses' : 'Back')}`);
   }
-  function verbMenu(entry) {
-    requestId++; verb = entry; view = 'verbs'; current = null;
-    render(`<h3>${esc(entry.english)} · <span lang="es">${esc(entry.spanish)}</span></h3><p>Choose a tense, say all five forms, then show and grade the set.</p>${Object.entries(tenses).map(([key,label])=>button('tense',label,key)).join('')}${button('mode','Back to verb list','verbs')}`);
+  function verbMenu() {
+    requestId++; view = 'verbs'; current = null;
+    render(`<h3>${esc(labels.verbs)}</h3><p>Choose one tense. You will conjugate three random verbs for all five subjects.</p>${Object.entries(tenses).map(([key,label])=>button('tense',label,key)).join('')}${button('home','Back to Spanish menu')}`);
+  }
+  function selectVerbSet(tense) {
+    const available = cards().filter(card => card.kind === 'verbs' && card.tense === tense);
+    if (available.length < 3) throw new Error('At least three verbs are required for this tense.');
+    requestId++;
+    current = {kind:'verbSet', tense, cards:sample(available,3), review:false, revealed:false, graded:false};
+    const verbs = current.cards.map((card,index) => `${index + 1}. ${card.english} · ${card.spanish}`).join('\n');
+    render(`<h3>${esc(labels.verbs)}</h3><div class="question" style="white-space:pre-line">${esc(tenses[tense] + '\n' + verbs + '\n\nConjugate each for yo, tú, él, nosotros, ellos.')}</div>${button('reveal','Show')}<div id="spAnswer" class="hidden" aria-live="polite"></div><div id="spGrades" class="sp-grades hidden">${button('right','Right','','class="sp-right"')}${button('wrong','Wrong','','class="sp-wrong"')}</div>${button('cardBack','Back to tenses')}`);
   }
   function reveal() {
     if (!current || current.revealed) return;
     current.revealed = true;
     $('spAnswer').classList.remove('hidden');
-    $('spAnswer').innerHTML = current.kind === 'verbs' ? `<table class="sp-table"><thead><tr><th>Subject</th><th>Spanish</th></tr></thead><tbody>${subjects.map((s,i)=>`<tr><td>${esc(current.tense === 'imperative' && i===2 ? 'usted' : current.tense === 'imperative' && i===4 ? 'ustedes' : s)}</td><td lang="es">${esc(current.forms[i])}</td></tr>`).join('')}</tbody></table>` : `<div class="sp-answer" lang="${current.reverse?'en':'es'}">${esc(current.reverse?current.english:current.spanish)}</div>`;
-    if (current.notes) $('spAnswer').innerHTML += `<p class="sp-small">${esc(current.notes)}</p>`;
+    const verbTable = card => `<div class="sp-verb-block"><h4>${esc(card.english)} · <span lang="es">${esc(card.spanish)}</span></h4><table class="sp-table"><thead><tr><th>Subject</th><th>Spanish</th></tr></thead><tbody>${subjects.map((s,i)=>`<tr><td>${esc(card.tense === 'imperative' && i===2 ? 'usted' : card.tense === 'imperative' && i===4 ? 'ustedes' : s)}</td><td lang="es">${esc(card.forms[i])}</td></tr>`).join('')}</tbody></table>${card.notes ? `<p class="sp-small">${esc(card.notes)}</p>` : ''}</div>`;
+    $('spAnswer').innerHTML = current.kind === 'verbSet' ? current.cards.map(verbTable).join('') : current.kind === 'verbs' ? verbTable(current) : `<div class="sp-answer" lang="${current.reverse?'en':'es'}">${esc(current.reverse?current.english:current.spanish)}</div>`;
+    if (current.kind !== 'verbs' && current.kind !== 'verbSet' && current.notes) $('spAnswer').innerHTML += `<p class="sp-small">${esc(current.notes)}</p>`;
     $('spAnswer').innerHTML += button('speak','Hear Spanish');
     $('spGrades').classList.remove('hidden');
   }
   function grade(right) {
     if (!current?.revealed || current.graded) return;
-    SpanishCore.grade(state,idOf(current),right); current.graded = true; save();
+    const ids = current.kind === 'verbSet' ? current.cards.map(idOf) : [idOf(current)];
+    SpanishCore.gradeMany(state,ids,right); current.graded = true; save();
     $('spGrades').querySelectorAll('button').forEach(b=>b.disabled=true);
-    $('spStatus').textContent = right ? 'Saved. Monthly review due '+new Date(state.reviews[idOf(current)].dueAt).toLocaleDateString()+'.' : 'Saved. This will return after five more graded Spanish questions.';
+    $('spStatus').textContent = right ? 'Saved. Monthly review due '+new Date(state.reviews[ids[0]].dueAt).toLocaleDateString()+'.' : current.kind === 'verbSet' ? 'Saved. These verbs will return after five more graded Spanish questions.' : 'Saved. This will return after five more graded Spanish questions.';
     if(warning) $('spStatus').textContent += '\n'+warning;
   }
   function review() {const list = dueCards(); if(list.length) selectCard(choose(list),false,true); else home();}
@@ -166,22 +189,22 @@ const SpanishApp = (() => {
       const eligible=list.filter(c=>!state.reviews[idOf(c)]||SpanishCore.isDue(state.reviews[idOf(c)],state));
       const card=action==='select'?list[Number($('spSelect').value)]:choose(eligible);
       if(!card) throw new Error('No eligible entries now. Choose an entry manually or use another mode.');
-      if(kind==='verbs') verbMenu(card); else selectCard(card,value==='reverse');
+      selectCard(card,value==='reverse');
     }
-    else if(action==='tense') {const row=cards().find(c=>c.kind==='verbs'&&SpanishCore.normalize(c.english)===SpanishCore.normalize(verb.english)&&c.tense===value);if(!row) throw new Error('No conjugations found for this tense.');selectCard(row);}
+    else if(action==='tense') selectVerbSet(value);
     else if(action==='reveal') reveal();
     else if(action==='right'||action==='wrong') grade(action==='right');
     else if(action==='cardBack') {
       const previous=current;
       if(previous?.graded&&dueCards().length) review();
-      else if(previous?.kind==='verbs'&&!previous.review) verbMenu(verb || previous);
+      else if(previous?.kind==='verbSet'||(previous?.kind==='verbs'&&!previous.review)) verbMenu();
       else if(previous?.review) home();
       else mode(previous?.reverse?'reverse':previous?.kind||view);
     }
     else if(action==='review') review();
     else if(action==='translateNew') await translateNew(value);
     else if(action==='manual') {const english=$('spNew').value.trim(),spanish=$('spManual').value.trim();if(!english||!spanish)throw new Error('Enter both English and Spanish.');const entry={kind:value,english,spanish,notes:'User translation.'};const index=state.additions.findIndex(c=>idOf(c)===idOf(entry));if(index>=0)state.additions[index]=entry;else state.additions.push(entry);save();selectCard(entry);reveal();}
-    else if(action==='speak') {if(!window.speechSynthesis||!window.SpeechSynthesisUtterance)throw new Error('Spanish speech is unavailable in this browser.');const text=current.forms?current.forms.filter(x=>x!=='—').join('. '):current.spanish;const utterance=new SpeechSynthesisUtterance(text);utterance.lang='es-ES';utterance.rate=.85;window.speechSynthesis.cancel();window.speechSynthesis.speak(utterance);}
+    else if(action==='speak') {if(!window.speechSynthesis||!window.SpeechSynthesisUtterance)throw new Error('Spanish speech is unavailable in this browser.');const text=current.kind==='verbSet'?current.cards.flatMap(card=>[card.spanish,...card.forms.filter(x=>x!=='—')]).join('. '):current.forms?current.forms.filter(x=>x!=='—').join('. '):current.spanish;const utterance=new SpeechSynthesisUtterance(text);utterance.lang='es-ES';utterance.rate=.85;window.speechSynthesis.cancel();window.speechSynthesis.speak(utterance);}
     else if(action==='backup') backup();
   }
   return {open};
